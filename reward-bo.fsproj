@@ -7,13 +7,24 @@
     <SrcDir>src</SrcDir>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(SrcDir)/Yolo.fs" />
+    <Compile Include="$(SrcDir)/Optics.fs" />
+    <Compile Include="$(SrcDir)/Config.fs" />
+    <Compile Include="$(SrcDir)/Dto/Slack.fs" />
+    <Compile Include="$(SrcDir)/Machines/Slack.fs" />
+    <Compile Include="$(SrcDir)/Machines/Slack/Challenge.fs" />
+    <Compile Include="$(SrcDir)/Router.fs" />
     <Compile Include="$(SrcDir)/KestrelInterop.fs" />
     <Compile Include="$(SrcDir)/Program.fs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Aether" Version="8.3.1" />
     <PackageReference Include="Freya" Version="4.0.*" />
+    <PackageReference Include="FsConfig" Version="2.1.3" />
+    <PackageReference Include="FSharp.Data" Version="3.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.*" />
     <PackageReference Include="Microsoft.AspNetCore.Owin" Version="2.*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
   </ItemGroup>
 </Project>

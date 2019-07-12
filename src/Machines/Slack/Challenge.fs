@@ -17,23 +17,34 @@
 (* along with this program.  If not, see <https://www.gnu.org/licenses/>.     *)
 (******************************************************************************)
 
-module Reward.__main__
+module Reward.Machines.Slack.Challenge
 #nowarn "62"
 #light "off"
 
-open Microsoft.AspNetCore.Hosting
-open Microsoft.Extensions.Logging
-open KestrelInterop
+open Aether.Operators
+open Freya.Core
+open Freya.Machines.Http
+open Freya.Types.Http
+open Freya.Optics.Http
+open Reward.Dto
 
-let configureLogging (builder:IWebHostBuilder) =
-  builder.ConfigureLogging(fun l -> l.AddConsole() |> ignore)
+let parseSlackChallenge =
+  Request.body_
+  >-> Slack.Dto.Challenge.stream_
+  >?> Slack.Domain.Challenge.dto_
+  |> Freya.Optic.get
+  |> Freya.memo
 
-[<EntryPoint>]
-let main argv =
-  let configureApp = ApplicationBuilder.useFreya Router.root in
-  WebHost.create ()
-  |> WebHost.bindTo [|"http://localhost:8080"|]
-  |> WebHost.configure configureApp
-  |> configureLogging
-  |> WebHost.buildAndRun;
-  0
+let representSlackChallenge = freya
+{ let! challenge = parseSlackChallenge in
+  let body = challenge.Value^.Slack.Domain.Challenge.value_ in
+  return Represent.text body
+}
+
+let m = freyaMachine
+{ methods POST
+; acceptableMediaTypes MediaType.Json
+; allowed verifySlackRequest
+; badRequest (parseSlackChallenge |> Freya.map Option.isNone)
+; handleOk representSlackChallenge
+}

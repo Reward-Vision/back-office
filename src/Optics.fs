@@ -17,23 +17,35 @@
 (* along with this program.  If not, see <https://www.gnu.org/licenses/>.     *)
 (******************************************************************************)
 
-module Reward.__main__
+module Reward.Optics
 #nowarn "62"
 #light "off"
 
-open Microsoft.AspNetCore.Hosting
-open Microsoft.Extensions.Logging
-open KestrelInterop
+open Aether
 
-let configureLogging (builder:IWebHostBuilder) =
-  builder.ConfigureLogging(fun l -> l.AddConsole() |> ignore)
+module String = begin
+  let stream_ : Epimorphism<System.IO.Stream, _> =
+    ( ( fun s ->
+          try
+            let reader = new System.IO.StreamReader(s) in
+            Some (reader.ReadToEnd())
+          with _ -> None
+      )
+    , ( fun s ->
+          let bytes = System.Text.Encoding.UTF8.GetBytes(s) in
+          upcast new System.IO.MemoryStream(bytes)
+      )
+    )
+end
 
-[<EntryPoint>]
-let main argv =
-  let configureApp = ApplicationBuilder.useFreya Router.root in
-  WebHost.create ()
-  |> WebHost.bindTo [|"http://localhost:8080"|]
-  |> WebHost.configure configureApp
-  |> configureLogging
-  |> WebHost.buildAndRun;
-  0
+module Stream = begin
+  let pos_ : Lens<System.IO.Stream, _> =
+    (fun s -> s.Position), (fun p s -> s.Position <- p; s)
+end
+
+module Int64 = begin
+  let string_ : Epimorphism<_, _> =
+    ( (fun s -> try Some (int64 s) with _ -> None)
+    , string
+    )
+end

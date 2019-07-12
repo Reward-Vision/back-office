@@ -17,23 +17,14 @@
 (* along with this program.  If not, see <https://www.gnu.org/licenses/>.     *)
 (******************************************************************************)
 
-module Reward.__main__
+module Reward.Router
 #nowarn "62"
 #light "off"
 
-open Microsoft.AspNetCore.Hosting
-open Microsoft.Extensions.Logging
-open KestrelInterop
+open Freya.Routers.Uri.Template
+open Freya.Types.Http
+open Reward.Machines
 
-let configureLogging (builder:IWebHostBuilder) =
-  builder.ConfigureLogging(fun l -> l.AddConsole() |> ignore)
-
-[<EntryPoint>]
-let main argv =
-  let configureApp = ApplicationBuilder.useFreya Router.root in
-  WebHost.create ()
-  |> WebHost.bindTo [|"http://localhost:8080"|]
-  |> WebHost.configure configureApp
-  |> configureLogging
-  |> WebHost.buildAndRun;
-  0
+let root = freyaRouter
+{ route POST "/~SLACK/challenge" Slack.Challenge.m
+}

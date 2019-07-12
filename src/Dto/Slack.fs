@@ -17,23 +17,47 @@
 (* along with this program.  If not, see <https://www.gnu.org/licenses/>.     *)
 (******************************************************************************)
 
-module Reward.__main__
+namespace Reward.Dto.Slack
 #nowarn "62"
 #light "off"
 
-open Microsoft.AspNetCore.Hosting
-open Microsoft.Extensions.Logging
-open KestrelInterop
+open System
+open Aether
+open FSharp.Data
 
-let configureLogging (builder:IWebHostBuilder) =
-  builder.ConfigureLogging(fun l -> l.AddConsole() |> ignore)
+module Dto = begin
+  module Challenge = begin
+    type Impl = JsonProvider<"src/Dto/slack_challenge.json">
+    type T = Impl.Root
 
-[<EntryPoint>]
-let main argv =
-  let configureApp = ApplicationBuilder.useFreya Router.root in
-  WebHost.create ()
-  |> WebHost.bindTo [|"http://localhost:8080"|]
-  |> WebHost.configure configureApp
-  |> configureLogging
-  |> WebHost.buildAndRun;
-  0
+    let stream_ : Epimorphism<IO.Stream, T> =
+    ( (fun s -> try Some (Impl.Load(s)) with _ -> None)
+    , ( fun json ->
+          let writer = new IO.StreamWriter(new IO.MemoryStream()) in
+          json.JsonValue.WriteTo(writer, JsonSaveOptions.DisableFormatting);
+          writer.BaseStream
+      )
+    )
+  end
+end
+
+module Domain = begin
+  module Challenge = begin
+    type T = T of string
+
+    [<Literal>] let TYPE = "url_verification";;
+
+    let dto_ : Epimorphism<Dto.Challenge.T, _> =
+    ( ( fun dto ->
+          if dto.Type = TYPE
+          then Some (T dto.Challenge)
+          else None
+      )
+    , ( fun (T v) ->
+          Dto.Challenge.T(token="<#ERROR#>", challenge=v, ``type``=TYPE)
+      )
+    )
+
+    let value_ : Lens<_, _> = (fun (T v) -> v), (fun v _ -> T v)
+  end
+end

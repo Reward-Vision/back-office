@@ -17,23 +17,22 @@
 (* along with this program.  If not, see <https://www.gnu.org/licenses/>.     *)
 (******************************************************************************)
 
-module Reward.__main__
+module Reward.Config
 #nowarn "62"
 #light "off"
 
-open Microsoft.AspNetCore.Hosting
-open Microsoft.Extensions.Logging
-open KestrelInterop
+open FsConfig
 
-let configureLogging (builder:IWebHostBuilder) =
-  builder.ConfigureLogging(fun l -> l.AddConsole() |> ignore)
+type Slack = { signingSecret : string
+             }
 
-[<EntryPoint>]
-let main argv =
-  let configureApp = ApplicationBuilder.useFreya Router.root in
-  WebHost.create ()
-  |> WebHost.bindTo [|"http://localhost:8080"|]
-  |> WebHost.configure configureApp
-  |> configureLogging
-  |> WebHost.buildAndRun;
-  0
+[<Convention("RWD")>]
+type Config = { slack : Slack
+              }
+
+let Config =
+  match EnvConfig.Get<Config>() with
+  | Ok config                      -> config
+  | Error (NotFound name)          -> failwithf "%s: required" name
+  | Error (BadValue (name, value)) -> failwithf "%s: %s: bad value" name value
+  | Error (NotSupported msg)       -> failwith msg
