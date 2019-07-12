@@ -17,7 +17,7 @@
 (* along with this program.  If not, see <https://www.gnu.org/licenses/>.     *)
 (******************************************************************************)
 
-module Reward.Machines.Slack.Challenge
+namespace Reward.Machines.Slack
 #nowarn "62"
 #light "off"
 
@@ -28,23 +28,31 @@ open Freya.Types.Http
 open Freya.Optics.Http
 open Reward.Dto
 
-let parseSlackChallenge =
-  Request.body_
-  >-> Slack.Dto.Challenge.stream_
-  >?> Slack.Domain.Challenge.dto_
-  |> Freya.Optic.get
-  |> Freya.memo
+[<AutoOpen>]
+module private __challenge__ = begin
+  let parseSlackChallenge =
+    Request.body_
+    >-> Slack.Dto.Challenge.stream_
+    >?> Slack.Domain.Challenge.dto_
+    |> Freya.Optic.get
+    |> Freya.memo
 
-let representSlackChallenge = freya
-{ let! challenge = parseSlackChallenge in
-  let body = challenge.Value^.Slack.Domain.Challenge.value_ in
-  return Represent.text body
-}
+  let representSlackChallenge = freya
+  { let! challenge = parseSlackChallenge in
+    let body = challenge.Value^.Slack.Domain.Challenge.value_ in
+    return Represent.text body
+  }
 
-let m = freyaMachine
-{ methods POST
-; acceptableMediaTypes MediaType.Json
-; allowed verifySlackRequest
-; badRequest (parseSlackChallenge |> Freya.map Option.isNone)
-; handleOk representSlackChallenge
-}
+  let machine = freyaMachine
+  { methods POST
+  ; acceptableMediaTypes MediaType.Json
+  ; allowed verifySlackRequest
+  ; badRequest (parseSlackChallenge |> Freya.map Option.isNone)
+  ; handleOk representSlackChallenge
+  }
+end
+
+type ChallengeMachine = Challenge
+  with
+    static member Pipeline(_) = HttpMachine.Pipeline(machine)
+  end

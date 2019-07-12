@@ -26,5 +26,5 @@ open Freya.Types.Http
 open Reward.Machines
 
 let root = freyaRouter
-{ route POST "/~SLACK/challenge" Slack.Challenge.m
+{ route POST "/~SLACK/challenge" Slack.Challenge
 }
