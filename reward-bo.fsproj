@@ -11,6 +11,7 @@
     <Compile Include="$(SrcDir)/Optics.fs" />
     <Compile Include="$(SrcDir)/Config.fs" />
     <Compile Include="$(SrcDir)/Dto/Slack.fs" />
+    <Compile Include="$(SrcDir)/Machines.fs" />
     <Compile Include="$(SrcDir)/Machines/Slack.fs" />
     <Compile Include="$(SrcDir)/Machines/Slack/Challenge.fs" />
     <Compile Include="$(SrcDir)/Router.fs" />
