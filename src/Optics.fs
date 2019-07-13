@@ -25,16 +25,14 @@ open System
 open Aether
 
 module String = begin
-  let stream_ : Epimorphism<System.IO.Stream, _> =
+  let stream_ : Isomorphism<IO.Stream, _> =
     ( ( fun s ->
-          try
-            let reader = new System.IO.StreamReader(s) in
-            Some (reader.ReadToEnd())
-          with _ -> None
+          let reader = new IO.StreamReader(s) in
+          reader.ReadToEnd()
       )
     , ( fun s ->
-          let bytes = System.Text.Encoding.UTF8.GetBytes(s) in
-          upcast new System.IO.MemoryStream(bytes)
+          let bytes = Text.Encoding.UTF8.GetBytes(s) in
+          upcast new IO.MemoryStream(bytes)
       )
     )
 end

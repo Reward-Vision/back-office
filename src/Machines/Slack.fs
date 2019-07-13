@@ -41,26 +41,26 @@ let verifySlackRequest = freya
   let inline ( <!> ) v f = Option.map f v in
   let now = DateTimeOffset.UtcNow.ToUnixTimeSeconds() in
   do! memoryBody in
-  let! shash = Freya.Optic.get (Request.header_ "X-Slack-Signature") in
+  let! body = Request.body_ >-> String.stream_ |> Freya.Optic.get in
+  do! Freya.Optic.set (Request.body_ >-> Stream.pos_) 0L in
   let! headers =
-    [ Request.header_ "X-Slack-Request-Timestamp" >-> Option.value_
-    ; Request.body_ >-> String.stream_
+    [ Request.header_ "X-Slack-Request-Timestamp"
+    ; Request.header_ "X-Slack-Signature"
     ] |> List.traverseFreyaA Freya.Optic.get
       |> Freya.map List.sequenceOptionA
       |> Freya.map (Option.bind List.toTuple)
   in
-  do! Freya.Optic.set (Request.body_ >-> Stream.pos_) 0L in
   return headers
   <|> ( fun data ->
           data^.(fst_ >-> Int64.string_)
           <|> (( - ) now >> ( > ) 10L)
           |> Option.isSome
       )
-  <!> ( fun (ts, body) ->
+  <!> ( fun (ts, signature) ->
           let base' = String.Join(':', "v0", ts, body) in
           let hash = hmac.ComputeHash(Utf8.bytes base') in
-          "v0=" + Bytes.toStringHex hash
+          "v0=" + Bytes.toStringHex hash = signature
       )
-  |> Option.lift2 ( = ) shash <|> id
+  <|> id
   |> Option.isSome
 }
