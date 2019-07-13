@@ -21,6 +21,7 @@ module Reward.Optics
 #nowarn "62"
 #light "off"
 
+open System
 open Aether
 
 module String = begin
@@ -39,13 +40,16 @@ module String = begin
 end
 
 module Stream = begin
-  let pos_ : Lens<System.IO.Stream, _> =
+  let pos_ : Lens<IO.Stream, _> =
     (fun s -> s.Position), (fun p s -> s.Position <- p; s)
 end
 
 module Int64 = begin
-  let string_ : Epimorphism<_, _> =
-    ( (fun s -> try Some (int64 s) with _ -> None)
+  let string_ : Epimorphism<string, _> =
+    ( ( fun s ->
+          let mutable result = Unchecked.defaultof<int64> in
+          if Int64.TryParse(s, &result) then Some result else None
+      )
     , string
     )
 end
