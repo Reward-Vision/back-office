@@ -40,17 +40,20 @@ module Bytes = begin
     else lookup32.[i] <- (uint32 s.[1]) + ((uint32 s.[0]) <<< 16)
   done
 
-  let toStringHex (b:byte []) =
-    let res = String('\x00', b.Length * 2) in
-    use bytesP = fixed b in
-    use resP = fixed res in
-    for i = 0 to b.Length-1 do
-      let resP32 = resP |> NativePtr.toNativeInt
-                        |> NativePtr.ofNativeInt<uint32> in
-      let value = NativePtr.get lookup32P (NativePtr.get bytesP i |> int) in
-      NativePtr.set resP32 i value
-    done;
-    res
+  let toStringHex : byte array -> _ = function
+  | [||] | null -> String.Empty
+  | bytes       -> let res = String('\x00', bytes.Length * 2) in
+                   use bytesP = fixed bytes in
+                   use resP = fixed res in
+                   for i = 0 to bytes.Length-1 do
+                     let resP32 = resP |> NativePtr.toNativeInt
+                                       |> NativePtr.ofNativeInt<uint32> in
+                     let value = NativePtr.get bytesP i
+                                 |> int
+                                 |> NativePtr.get lookup32P in
+                     NativePtr.set resP32 i value
+                   done;
+                   res
 end
 
 module Utf8 = begin
