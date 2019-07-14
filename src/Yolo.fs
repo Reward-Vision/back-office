@@ -28,10 +28,10 @@ module Bytes = begin
   open System.Runtime.InteropServices
   open Microsoft.FSharp.NativeInterop
 
-  let private lookup32 = Array.zeroCreate<uint32> 256
-  let private lookup32P = GCHandle.Alloc(lookup32, GCHandleType.Pinned)
-                                  .AddrOfPinnedObject()
-                          |> NativePtr.ofNativeInt<uint32>
+  let lookup32 = Array.zeroCreate<uint32> 256
+  let lookup32P = GCHandle.Alloc(lookup32, GCHandleType.Pinned)
+                          .AddrOfPinnedObject()
+                  |> NativePtr.ofNativeInt<uint32>
 
   do for i = 0 to 255 do
     let s = i.ToString("x2") in

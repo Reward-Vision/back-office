@@ -7,6 +7,7 @@
     <SrcDir>src</SrcDir>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(SrcDir)/Yolo.fsi" />
     <Compile Include="$(SrcDir)/Yolo.fs" />
     <Compile Include="$(SrcDir)/Optics.fsi" />
     <Compile Include="$(SrcDir)/Optics.fs" />
