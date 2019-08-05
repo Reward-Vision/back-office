@@ -95,3 +95,11 @@ module Int64 = begin
                                   , int64
                                   >
 end
+
+module NameValueCollection = begin
+  /// Epimorphism to parse a `x-www-form-urlencoded` dictionary into an
+  /// `System.Linq.IQueryable`.
+  val httpQueryString_ : Aether.Epimorphism< string
+                                           , System.Collections.Specialized.NameValueCollection
+                                           >
+end

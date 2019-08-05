@@ -83,3 +83,17 @@ module Int64 = begin
     , string
     )
 end
+
+module NameValueCollection = begin
+  let httpQueryString_ : Epimorphism<_, _> =
+    ( ( fun s ->
+          try
+            match HttpUtility.ParseQueryString(s) with
+            | null -> None
+            | seq  -> Some seq
+          with
+          | _ -> None
+      )
+    , fun seq -> seq.ToString()
+    )
+end

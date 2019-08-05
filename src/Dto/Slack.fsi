@@ -17,15 +17,65 @@
 (* along with this program.  If not, see <https://www.gnu.org/licenses/>.     *)
 (******************************************************************************)
 
-module Reward.Router
+namespace Reward.Dto.Slack
 #nowarn "62"
 #light "off"
 
-open Freya.Routers.Uri.Template
-open Freya.Types.Http
-open Reward.Machines
+module Dto = begin
+  module Challenge = begin
+    type T = FSharp.Data.JsonProvider<"src/Dto/slack_challenge.json">.Root
 
-let root = freyaRouter
-{ route POST "/~SLACK/challenge" Slack.Challenge
-; route POST "/~SLACK/command/reward" Slack.Command.Reward
-}
+    val stream_ : Aether.Epimorphism<System.IO.Stream, T>
+  end
+
+  module UserId = begin
+    type T
+
+    val nvc_ : Aether.Prism<System.Collections.Specialized.NameValueCollection, T>
+    val mrkdwn_ : Aether.Epimorphism<string, T>
+  end
+
+  type Help;;
+  type Help with
+    static member json_ : Aether.Epimorphism<string, Help>
+  end
+
+  module Command = begin
+    type T
+
+    val stream_ : Aether.Epimorphism<System.IO.Stream, T>
+  end
+end
+
+module Domain = begin
+  module Challenge = begin
+    type T
+
+    val dto_ : Aether.Epimorphism<Dto.Challenge.T, T>
+
+    val value_ : Aether.Lens<T, string>
+  end
+
+  type UserId;;
+  type UserId with
+    static member dto_ : Aether.Isomorphism<Dto.UserId.T, UserId>
+    static member id_ : Aether.Lens<UserId, string>
+    static member name_ : Aether.Lens<UserId, string>
+  end
+
+  type Help;;
+  type Help with
+    static member dto_ : Aether.Isomorphism<Dto.Help, Help>
+    static member userId_ : Aether.Lens<Help, UserId>
+  end
+
+  module Command = begin
+    type T
+
+    val dto_ : Aether.Epimorphism<Dto.Command.T, T>
+
+    val text_ : Aether.Lens<T, string>
+    val invoker_ : Aether.Lens<T, UserId>
+    val triggerId_ : Aether.Lens<T, string>
+  end
+end

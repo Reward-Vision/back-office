@@ -12,17 +12,22 @@
     <Compile Include="$(SrcDir)/Optics.fsi" />
     <Compile Include="$(SrcDir)/Optics.fs" />
     <Compile Include="$(SrcDir)/Config.fs" />
+    <Compile Include="$(SrcDir)/Freya.fs" />
+    <Compile Include="$(SrcDir)/Dto/Slack.fsi" />
     <Compile Include="$(SrcDir)/Dto/Slack.fs" />
     <Compile Include="$(SrcDir)/Machines.fs" />
     <Compile Include="$(SrcDir)/Machines/Slack.fs" />
     <Compile Include="$(SrcDir)/Machines/Slack/Challenge.fsi" />
     <Compile Include="$(SrcDir)/Machines/Slack/Challenge.fs" />
+    <Compile Include="$(SrcDir)/Machines/Slack/Command/Reward.fs" />
     <Compile Include="$(SrcDir)/Router.fs" />
     <Compile Include="$(SrcDir)/KestrelInterop.fs" />
     <Compile Include="$(SrcDir)/Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Aether" Version="8.3.1" />
+    <PackageReference Include="FParsec" Version="1.0.3" />
+    <PackageReference Include="FParsec-Pipes" Version="1.1.1" />
     <PackageReference Include="Freya" Version="4.0.*" />
     <PackageReference Include="FsConfig" Version="2.1.3" />
     <PackageReference Include="FSharp.Data" Version="3.1.1" />
