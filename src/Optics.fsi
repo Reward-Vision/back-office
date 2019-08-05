@@ -21,6 +21,51 @@ module Reward.Optics
 #nowarn "62"
 #light "off"
 
+[<RequireQualifiedAccess>]
+module Compose = begin
+  type Isomorphism = Isomorphism with
+    static member ( <.> ) : Isomorphism * Aether.Isomorphism<'β, 'γ>
+                         -> ( Aether.Isomorphism<'α, 'β>
+                              -> Aether.Isomorphism<'α, 'γ>
+                            )
+
+    static member ( <.> ) : Isomorphism * Aether.Epimorphism<'β, 'γ>
+                         -> ( Aether.Isomorphism<'α, 'β>
+                              -> Aether.Epimorphism<'α, 'γ>
+                            )
+  end
+
+  type Epimorphism = Epimorphism with
+    static member ( <?> ) : Epimorphism * Aether.Isomorphism<'β, 'γ>
+                         -> ( Aether.Epimorphism<'α, 'β>
+                              -> Aether.Epimorphism<'α, 'γ>
+                            )
+
+    static member ( <?> ) : Epimorphism * Aether.Epimorphism<'β, 'γ>
+                         -> ( Aether.Epimorphism<'α, 'β>
+                              -> Aether.Epimorphism<'α, 'γ>
+                            )
+  end
+end
+
+module Operators = begin
+  val inline ( <.> ) : 'α
+                    -> ^β
+                    -> 'γ
+                    when (Compose.Isomorphism or ^β):
+                      ( static member ( <.> ) : Compose.Isomorphism * ^β
+                                             -> ('α -> 'γ)
+                      )
+
+  val inline ( <?> ) : 'α
+                    -> ^β
+                    -> 'γ
+                    when (Compose.Epimorphism or ^β):
+                      ( static member ( <?> ) : Compose.Epimorphism * ^β
+                                             -> ('α -> 'γ)
+                      )
+end
+
 module String = begin
   /// Isomorphism between streams and strings.
   ///

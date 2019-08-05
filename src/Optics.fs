@@ -22,7 +22,39 @@ module Reward.Optics
 #light "off"
 
 open System
+open System.Web
 open Aether
+
+[<RequireQualifiedAccess>]
+module Compose = begin
+  type Isomorphism = Isomorphism with
+    static member ( <.> ) (Isomorphism, (gb, sb):Isomorphism<'β, 'γ>) =
+      fun ((ga, sa):Isomorphism<'α, 'β>) ->
+        (ga >> gb, sb >> sa):Isomorphism<'α, 'γ>
+
+    static member ( <.> ) (Isomorphism, (gb, sb):Epimorphism<'β, 'γ>) =
+      fun ((ga, sa):Isomorphism<'α, 'β>) ->
+        (ga >> gb, sb >> sa):Epimorphism<'α, 'γ>
+  end
+
+  type Epimorphism = Epimorphism with
+    static member ( <?> ) (Epimorphism, (gb, sb):Isomorphism<'β, 'γ>) =
+      fun ((ga, sa):Epimorphism<'α, 'β>) ->
+        (ga >> Option.map gb, sb >> sa):Epimorphism<'α, 'γ>
+
+    static member ( <?> ) (Epimorphism, (gb, sb):Epimorphism<'β, 'γ>) =
+      fun ((ga, sa):Epimorphism<'α, 'β>) ->
+        (ga >> Option.bind gb, sb >> sa):Epimorphism<'α, 'γ>
+  end
+
+  let inline isomorphism i m = Isomorphism <.> m <| i
+  let inline epimorphism e m = Epimorphism <?> m <| e
+end
+
+module Operators = begin
+  let inline ( <.> ) i m = Compose.isomorphism i m
+  let inline ( <?> ) e m = Compose.epimorphism e m
+end
 
 module String = begin
   let stream_ : Isomorphism<IO.Stream, _> =
