@@ -71,6 +71,38 @@ module Dto = begin
       )
   end
 
+  type FastHelp = FastHelp of UserId.T with
+    static member json_ : Epimorphism<_, _> =
+      let format:Printf.StringFormat<_> = """
+{
+  "response_type": "ephemeral",
+  "text": "Hello %s! This doesn’t look like a valid command. Just type `/reward` to get started :smiley:",
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "context",
+          "elements": [
+            {
+              "type": "mrkdwn",
+              "text": "For more info, type `/reward help`"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+      """ in
+       ( (fst UserId.mrkdwn_ >> Option.map FastHelp)
+      , ( fun (FastHelp userid) ->
+            let uid = (snd UserId.mrkdwn_) userid in
+            sprintf format uid
+        )
+      )
+
+  end
+
   type Help = Help of UserId.T with
     static member json_ : Epimorphism<_, _> =
       let format:Printf.StringFormat<_> = """
@@ -161,6 +193,17 @@ module Domain = begin
       ( (fun u -> Option.defaultValue "" u.name)
       , (fun name u -> {u with name=Some name})
       )
+  end
+
+  type FastHelp = { userid : UserId
+                  } with
+    static member dto_ : Isomorphism<Dto.FastHelp, _> =
+      ( (fun (Dto.FastHelp userid) -> {userid=userid^.(id_ >-> UserId.dto_)})
+      , (fun xx -> Dto.FastHelp ((snd UserId.dto_) xx.userid))
+      )
+
+    static member userId_ : Lens<_, _> =
+      (fun xx -> xx.userid), (fun id xx -> {xx with userid=id})
   end
 
   type Help = { userid : UserId

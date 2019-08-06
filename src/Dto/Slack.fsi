@@ -35,6 +35,11 @@ module Dto = begin
     val mrkdwn_ : Aether.Epimorphism<string, T>
   end
 
+  type FastHelp;;
+  type FastHelp with
+    static member json_ : Aether.Epimorphism<string, FastHelp>
+  end
+
   type Help;;
   type Help with
     static member json_ : Aether.Epimorphism<string, Help>
@@ -61,6 +66,12 @@ module Domain = begin
     static member dto_ : Aether.Isomorphism<Dto.UserId.T, UserId>
     static member id_ : Aether.Lens<UserId, string>
     static member name_ : Aether.Lens<UserId, string>
+  end
+
+  type FastHelp;;
+  type FastHelp with
+    static member dto_ : Aether.Isomorphism<Dto.FastHelp, FastHelp>
+    static member userId_ : Aether.Lens<FastHelp, UserId>
   end
 
   type Help;;

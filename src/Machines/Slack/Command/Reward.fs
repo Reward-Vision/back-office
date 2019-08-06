@@ -63,16 +63,29 @@ module __reward__ = begin
     let invoker = command^.Slack.Domain.Command.invoker_ in
     invoker^=userId_
 
+  let representFastHelp command =
+    let userId_ =
+      (Aether.Prism.ofEpimorphism Slack.Dto.FastHelp.json_)
+      >?> Slack.Domain.FastHelp.dto_
+      >?> Slack.Domain.FastHelp.userId_
+    in
+    let invoker = command^.Slack.Domain.Command.invoker_ in
+    invoker^=userId_
+
   let representCommand = freya
   { let! command' = parseBody in
     let command = command'.Value in
-    let represent = representHelp command in
+    let represent =
+      match parseCommand (command^.Slack.Domain.Command.text_) with
+      | Help -> representHelp
+      | _ -> representFastHelp
+    in
     return { Description={ Charset=Some Charset.Utf8
                          ; Encodings=None
                          ; MediaType=Some MediaType.Json
                          ; Languages=None
                          }
-           ; Data=Utf8.bytes (represent "")
+           ; Data=Utf8.bytes (represent command "")
            }
   }
 
